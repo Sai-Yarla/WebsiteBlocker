@@ -62,19 +62,77 @@
       border-top: 1px solid #eee;
     }
 
-    .back-link {
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .back-link,
+    .temp-access-btn {
       display: inline-block;
-      margin-top: 20px;
       padding: 10px 20px;
-      background: #667eea;
       color: white;
       text-decoration: none;
       border-radius: 6px;
-      transition: background 0.3s;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .back-link {
+      background: #667eea;
     }
 
     .back-link:hover {
       background: #764ba2;
+      transform: translateY(-2px);
+    }
+
+    .temp-access-btn {
+      background: #ff6b6b;
+    }
+
+    .temp-access-btn:hover:not(:disabled) {
+      background: #ff5252;
+      transform: translateY(-2px);
+    }
+
+    .temp-access-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .timer-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .timer-info.active {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .countdown {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff6b6b;
+    }
+
+    .next-available {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -84,7 +142,163 @@
     <h1>Page Blocked</h1>
     <p>This site is blocked by Page Blocker extension.</p>
     <div class="reason">You can manage blocked sites in the extension settings.</div>
-    <a href="#" class="back-link" onclick="history.back(); return false;">Go Back</a>
+
+    <div class="button-group">
+      <a href="#" class="back-link" onclick="goBack(); return false;">Go Back</a>
+      <button class="temp-access-btn" id="tempAccessBtn" onclick="requestTemporaryAccess()">
+        Temporary Access (60s)
+      </button>
+    </div>
+
+    <div class="timer-info" id="timerInfo" style="display: none;">
+      <div>Temporary access active: <span class="countdown" id="countdown">60</span>s remaining</div>
+    </div>
+
+    <div class="timer-info" id="nextAvailableInfo" style="display: none;">
+      <div>Next temporary access available in:</div>
+      <div class="next-available" id="nextAvailableTimer"></div>
+    </div>
   </div>
+
+  <script>
+    const TEMP_ACCESS_DURATION = 60 * 1000; // 60 seconds
+    const RESET_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
+    const STORAGE_KEY = 'tempAccessData';
+
+    function getUrlDomain() {
+      const params = new URLSearchParams(window.location.search);
+      try {
+        const blockedUrl = params.get('blocked');
+        if (blockedUrl) {
+          return new URL(blockedUrl).hostname;
+        }
+      } catch (e) {
+        console.error('Could not parse URL:', e);
+      }
+      return 'unknown';
+    }
+
+    function getTempAccessData(domain) {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if (!data[domain]) {
+        data[domain] = { lastReset: Date.now(), used: false };
+      }
+      return data;
+    }
+
+    function saveTempAccessData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function canUseTempAccess() {
+      const domain = getUrlDomain();
+      const data = getTempAccessData(domain);
+      const domainData = data[domain];
+      const timeSinceReset = Date.now() - domainData.lastReset;
+
+      if (timeSinceReset > RESET_INTERVAL) {
+        // Reset the timer
+        domainData.lastReset = Date.now();
+        domainData.used = false;
+        saveTempAccessData(data);
+      }
+
+      return !domainData.used;
+    }
+
+    function requestTemporaryAccess() {
+      const domain = getUrlDomain();
+      const data = getTempAccessData(domain);
+      const domainData = data[domain];
+
+      if (!canUseTempAccess()) {
+        updateButtonState(false);
+        return;
+      }
+
+      // Mark as used
+      domainData.used = true;
+      saveTempAccessData(data);
+
+      // Allow access and show countdown
+      const blockedUrl = new URLSearchParams(window.location.search).get('blocked');
+      if (blockedUrl) {
+        showCountdown();
+        setTimeout(() => {
+          window.location.href = blockedUrl;
+        }, 1000);
+      }
+    }
+
+    function showCountdown() {
+      document.getElementById('tempAccessBtn').disabled = true;
+      document.getElementById('timerInfo').style.display = 'block';
+
+      let remaining = 59;
+      document.getElementById('countdown').textContent = remaining;
+
+      const interval = setInterval(() => {
+        remaining--;
+        document.getElementById('countdown').textContent = remaining;
+        if (remaining <= 0) {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
+
+    function updateButtonState(canUse) {
+      const btn = document.getElementById('tempAccessBtn');
+      const timerInfo = document.getElementById('timerInfo');
+      const nextAvailableInfo = document.getElementById('nextAvailableInfo');
+
+      if (canUse) {
+        btn.disabled = false;
+        btn.textContent = 'Temporary Access (60s)';
+        nextAvailableInfo.style.display = 'none';
+      } else {
+        btn.disabled = true;
+        const domain = getUrlDomain();
+        const data = getTempAccessData(domain);
+        const domainData = data[domain];
+        const timeSinceReset = Date.now() - domainData.lastReset;
+        const timeUntilReset = RESET_INTERVAL - timeSinceReset;
+
+        if (timeUntilReset > 0) {
+          nextAvailableInfo.style.display = 'block';
+          timerInfo.style.display = 'none';
+          updateNextAvailableTimer(timeUntilReset);
+        }
+      }
+    }
+
+    function updateNextAvailableTimer(timeRemaining) {
+      const updateTimer = () => {
+        const hours = Math.floor(timeRemaining / (60 * 60 * 1000));
+        const minutes = Math.floor((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
+        const seconds = Math.floor((timeRemaining % (60 * 1000)) / 1000);
+
+        document.getElementById('nextAvailableTimer').textContent =
+          `${hours}h ${minutes}m ${seconds}s`;
+
+        timeRemaining -= 1000;
+        if (timeRemaining > 0) {
+          setTimeout(updateTimer, 1000);
+        } else {
+          updateButtonState(true);
+        }
+      };
+
+      updateTimer();
+    }
+
+    function goBack() {
+      history.back();
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateButtonState(canUseTempAccess());
+    });
+  </script>
 </body>
 </html>
