@@ -47,10 +47,51 @@ function checkAndBlockUrl(tabId, url) {
     const blockedUrls = result.blockedUrls || [];
     
     if (isUrlBlocked(url, blockedUrls)) {
-      // Redirect to blocked page immediately
-      chrome.tabs.update(tabId, {
-        url: chrome.runtime.getURL('src/blocked.html?blocked=' + encodeURIComponent(url))
+      // Send message to content script to check temporary access
+      chrome.tabs.sendMessage(tabId, { action: 'checkTempAccess' }).then((response) => {
+        if (!response || !response.hasAccess) {
+          // Redirect to blocked page
+          chrome.tabs.update(tabId, {
+            url: chrome.runtime.getURL('src/blocked.html?blocked=' + encodeURIComponent(url))
+          });
+        }
+      }).catch(() => {
+        // If messaging fails, redirect to blocked page
+        chrome.tabs.update(tabId, {
+          url: chrome.runtime.getURL('src/blocked.html?blocked=' + encodeURIComponent(url))
+        });
       });
     }
   });
+}
+
+// Function to check if temporary access is valid (runs in content script context)
+function checkTempAccess(domain) {
+  const STORAGE_KEY = 'tempAccessData';
+  const RESET_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
+  
+  try {
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (data[domain]) {
+      const domainData = data[domain];
+      
+      // Check if access has expired
+      if (domainData.accessExpires && Date.now() < domainData.accessExpires) {
+        return { hasAccess: true };
+      }
+      
+      // Check if we need to reset the 2-hour timer
+      const timeSinceReset = Date.now() - domainData.lastReset;
+      if (timeSinceReset > RESET_INTERVAL) {
+        domainData.lastReset = Date.now();
+        domainData.used = false;
+        domainData.accessExpires = null;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+    }
+  } catch (e) {
+    console.error('Error checking temp access:', e);
+  }
+  
+  return { hasAccess: false };
 }

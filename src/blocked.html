@@ -216,17 +216,21 @@
         return;
       }
 
-      // Mark as used
+      // Mark as used and set expiration time
       domainData.used = true;
+      domainData.accessExpires = Date.now() + TEMP_ACCESS_DURATION;
       saveTempAccessData(data);
 
-      // Allow access and show countdown
+      // Show countdown
+      showCountdown();
+      
+      // Redirect to blocked URL
       const blockedUrl = new URLSearchParams(window.location.search).get('blocked');
       if (blockedUrl) {
-        showCountdown();
+        // Wait a moment before redirecting
         setTimeout(() => {
           window.location.href = blockedUrl;
-        }, 1000);
+        }, 500);
       }
     }
 
