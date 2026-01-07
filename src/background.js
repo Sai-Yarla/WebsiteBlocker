@@ -30,15 +30,12 @@ function checkAndBlockUrl(tabId, url) {
     const blockedUrls = result.blockedUrls || [];
     
     if (isUrlBlocked(url, blockedUrls)) {
-      // Replace page content with sad face
-      chrome.tabs.sendMessage(tabId, { action: 'blockPage' }).catch(() => {
-        // Fallback: inject content script if message fails
-        chrome.tabs.executeScript(tabId, {
-          file: 'src/content.js',
-          allFrames: false
-        }).catch(() => {
-          // Silent fail for non-HTTP pages
-        });
+      // Inject content script to block the page
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['src/content.js']
+      }).catch((error) => {
+        console.log('Could not inject script:', error);
       });
     }
   });

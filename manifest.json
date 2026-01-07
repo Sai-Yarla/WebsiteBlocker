@@ -5,8 +5,8 @@
   "description": "Block URLs and display a sad face when blocked links are opened",
   "permissions": [
     "storage",
-    "webRequest",
-    "tabs"
+    "tabs",
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"

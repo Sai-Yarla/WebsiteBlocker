@@ -1,12 +1,6 @@
-// Listen for messages from background script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'blockPage') {
-    blockPage();
-    sendResponse({ status: 'blocked' });
-  }
-});
+// Block the page and show sad face immediately on injection
+blockPage();
 
-// Block the page and show sad face
 function blockPage() {
   document.documentElement.innerHTML = `
     <!DOCTYPE html>
@@ -73,24 +67,4 @@ function blockPage() {
     </body>
     </html>
   `;
-  document.body.style.margin = '0';
-  document.body.style.padding = '0';
-}
-
-// Run on page load
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    // Check if page should be blocked on load
-    checkPageOnLoad();
-  });
-} else {
-  checkPageOnLoad();
-}
-
-function checkPageOnLoad() {
-  chrome.runtime.sendMessage({ action: 'checkUrl', url: window.location.href }, (response) => {
-    if (response && response.isBlocked) {
-      blockPage();
-    }
-  });
 }
