@@ -153,6 +153,7 @@ function showRemovalConfirmation(domain, index) {
     justify-content: center;
     align-items: center;
     z-index: 10000;
+    overflow-y: auto;
   `;
 
   const confirmBox = document.createElement('div');
@@ -160,101 +161,181 @@ function showRemovalConfirmation(domain, index) {
     background: white;
     padding: 30px;
     border-radius: 12px;
-    max-width: 400px;
+    max-width: 450px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     text-align: center;
+    margin: 20px;
   `;
 
   const title = document.createElement('h2');
-  title.textContent = '⚠️ Are You Sure?';
-  title.style.cssText = 'color: #ff6b6b; margin: 0 0 15px 0; font-size: 20px;';
+  title.textContent = '⚠️ HOLD UP! ⚠️';
+  title.style.cssText = 'color: #ff6b6b; margin: 0 0 15px 0; font-size: 22px;';
 
   const message = document.createElement('p');
-  message.textContent = `You're about to unblock "${domain}". This is a BIG decision! Answer the question below to confirm you really want to remove it.`;
-  message.style.cssText = 'color: #666; margin: 0 0 20px 0; line-height: 1.6;';
+  message.textContent = `You REALLY want to unblock "${domain}"? Complete ALL 10 tasks below to prove you're serious:`;
+  message.style.cssText = 'color: #666; margin: 0 0 20px 0; line-height: 1.6; font-weight: bold;';
 
-  // Generate random quiz questions
-  const questions = [
-    {
-      q: 'How many seconds of temporary access do you get per 2 hours?',
-      a: '60',
-      options: ['30', '60', '120', '45']
-    },
-    {
-      q: 'What color is the "Go Back" button?',
-      a: 'Blue',
-      options: ['Red', 'Blue', 'Green', 'Purple']
-    },
-    {
-      q: 'How often does the temporary access reset?',
-      a: '2 hours',
-      options: ['1 hour', '30 minutes', '2 hours', '3 hours']
-    },
-    {
-      q: 'What emoji shows on the blocked page?',
-      a: '😢',
-      options: ['😠', '😢', '😴', '😤']
-    }
+  const tasksContainer = document.createElement('div');
+  tasksContainer.style.cssText = 'text-align: left; background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; max-height: 300px; overflow-y: auto;';
+
+  const tasks = [
+    { text: 'Type "I WANT TO PROCRASTINATE"', type: 'text', validate: (v) => v === 'I WANT TO PROCRASTINATE' },
+    { text: 'Solve: 15 × 3 = ?', type: 'math', validate: (v) => v === '45' },
+    { text: 'Click the button that says "Nope"', type: 'button', options: ['Yes', 'Nope', 'Maybe'], correct: 1 },
+    { text: 'Enter: page + blocker + extension', type: 'text', validate: (v) => v.toLowerCase() === 'pageblockerextension' },
+    { text: 'What color is the sad face page?', type: 'select', options: ['Red', 'Blue & Purple', 'Green', 'Yellow'], correct: 1 },
+    { text: 'Solve: 200 ÷ 4 = ?', type: 'math', validate: (v) => v === '50' },
+    { text: 'Type "I PROMISE I WILL FOCUS"', type: 'text', validate: (v) => v === 'I PROMISE I WILL FOCUS' },
+    { text: 'Click the button that says "Keep It"', type: 'button', options: ['Remove It', 'Keep It', 'Maybe Later'], correct: 1 },
+    { text: 'Solve: 7 × 8 = ?', type: 'math', validate: (v) => v === '56' },
+    { text: 'Type "STAY FOCUSED"', type: 'text', validate: (v) => v === 'STAY FOCUSED' }
   ];
 
-  const quiz = questions[Math.floor(Math.random() * questions.length)];
-  const shuffledOptions = quiz.options.sort(() => Math.random() - 0.5);
+  let completedTasks = 0;
+  const taskInputs = [];
 
-  const question = document.createElement('p');
-  question.textContent = quiz.q;
-  question.style.cssText = 'color: #333; font-weight: bold; margin: 0 0 15px 0;';
-
-  // Create answer buttons
-  const answerContainer = document.createElement('div');
-  answerContainer.style.cssText = 'display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;';
-
-  const buttons = [];
-  shuffledOptions.forEach((option) => {
-    const btn = document.createElement('button');
-    btn.textContent = option;
-    btn.style.cssText = `
-      padding: 10px 15px;
-      background: #f0f0f0;
-      border: 2px solid #ddd;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
+  tasks.forEach((task, idx) => {
+    const taskDiv = document.createElement('div');
+    taskDiv.style.cssText = `
+      margin-bottom: 12px;
+      padding: 12px;
+      background: white;
+      border-left: 4px solid #ddd;
+      border-radius: 4px;
     `;
 
-    btn.addEventListener('mouseover', () => {
-      btn.style.background = '#e0e0e0';
-    });
+    const taskLabel = document.createElement('div');
+    taskLabel.textContent = `${idx + 1}. ${task.text}`;
+    taskLabel.style.cssText = 'font-size: 13px; font-weight: bold; color: #333; margin-bottom: 8px;';
+    taskDiv.appendChild(taskLabel);
 
-    btn.addEventListener('mouseout', () => {
-      btn.style.background = '#f0f0f0';
-    });
+    let input;
+    if (task.type === 'text' || task.type === 'math') {
+      input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Enter answer...';
+      input.style.cssText = `
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 12px;
+        box-sizing: border-box;
+      `;
+      input.addEventListener('input', () => checkAllTasks());
+      taskDiv.appendChild(input);
+    } else if (task.type === 'button') {
+      const buttonGroup = document.createElement('div');
+      buttonGroup.style.cssText = 'display: flex; gap: 8px;';
+      task.options.forEach((option, optIdx) => {
+        const btn = document.createElement('button');
+        btn.textContent = option;
+        btn.style.cssText = `
+          flex: 1;
+          padding: 8px;
+          background: #f0f0f0;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 12px;
+          transition: all 0.2s;
+        `;
+        btn.addEventListener('click', () => {
+          if (optIdx === task.correct) {
+            btn.style.background = '#90ee90';
+            btn.style.borderColor = '#22aa22';
+          } else {
+            btn.style.background = '#ffcccc';
+            btn.style.borderColor = '#ff0000';
+          }
+          checkAllTasks();
+        });
+        buttonGroup.appendChild(btn);
+      });
+      taskDiv.appendChild(buttonGroup);
+      input = { value: null, dataset: { correct: false } };
+    } else if (task.type === 'select') {
+      const select = document.createElement('select');
+      select.style.cssText = `
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 12px;
+        box-sizing: border-box;
+      `;
+      select.innerHTML = '<option value="">-- Choose --</option>';
+      task.options.forEach((option, optIdx) => {
+        const opt = document.createElement('option');
+        opt.value = optIdx;
+        opt.textContent = option;
+        select.appendChild(opt);
+      });
+      select.addEventListener('change', () => checkAllTasks());
+      taskDiv.appendChild(select);
+      input = select;
+    }
 
-    btn.addEventListener('click', () => {
-      if (option === quiz.a) {
-        // Correct answer - proceed with removal
-        modal.remove();
-        actuallyRemoveUrl(index);
-        showStatus('Website unblocked successfully!', 'success');
-        loadBlockedUrls();
-      } else {
-        // Wrong answer - show error
-        btn.style.background = '#ff9999';
-        btn.textContent = '❌ Wrong!';
-        btn.disabled = true;
-        setTimeout(() => {
-          showStatus('Nice try! Wrong answer. The website stays blocked. 😏', 'error');
-          modal.remove();
-        }, 1500);
+    taskInputs.push({ input, task });
+    tasksContainer.appendChild(taskDiv);
+  });
+
+  function checkAllTasks() {
+    let allComplete = true;
+    taskInputs.forEach(({ input, task }) => {
+      let isComplete = false;
+      
+      if (task.type === 'text' || task.type === 'math') {
+        isComplete = task.validate(input.value);
+      } else if (task.type === 'button') {
+        isComplete = input.dataset.correct === 'true';
+      } else if (task.type === 'select') {
+        isComplete = parseInt(input.value) === task.correct;
       }
+      
+      if (!isComplete) allComplete = false;
     });
 
-    buttons.push(btn);
-    answerContainer.appendChild(btn);
+    removeBtn.disabled = !allComplete;
+    removeBtn.style.opacity = allComplete ? '1' : '0.5';
+    removeBtn.style.cursor = allComplete ? 'pointer' : 'not-allowed';
+  }
+
+  const removeBtn = document.createElement('button');
+  removeBtn.textContent = '✅ YES, UNBLOCK IT! (Complete all tasks first)';
+  removeBtn.disabled = true;
+  removeBtn.style.cssText = `
+    padding: 12px 15px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: not-allowed;
+    font-size: 14px;
+    font-weight: bold;
+    width: 100%;
+    margin-bottom: 10px;
+    opacity: 0.5;
+    transition: all 0.2s;
+  `;
+
+  removeBtn.addEventListener('mouseover', () => {
+    if (!removeBtn.disabled) removeBtn.style.background = '#ff5252';
+  });
+
+  removeBtn.addEventListener('mouseout', () => {
+    if (!removeBtn.disabled) removeBtn.style.background = '#ff6b6b';
+  });
+
+  removeBtn.addEventListener('click', () => {
+    modal.remove();
+    actuallyRemoveUrl(index);
+    showStatus('You unblocked it! 😅 Hope it was worth it...', 'success');
+    loadBlockedUrls();
   });
 
   const cancelBtn = document.createElement('button');
-  cancelBtn.textContent = 'Never mind, keep it blocked';
+  cancelBtn.textContent = 'Nevermind! Keep it blocked (Smart choice 🧠)';
   cancelBtn.style.cssText = `
     padding: 10px 15px;
     background: #667eea;
@@ -277,13 +358,13 @@ function showRemovalConfirmation(domain, index) {
 
   cancelBtn.addEventListener('click', () => {
     modal.remove();
-    showStatus('Good choice! Staying focused. 💪', 'success');
+    showStatus('Excellent! Staying focused. 💪', 'success');
   });
 
   confirmBox.appendChild(title);
   confirmBox.appendChild(message);
-  confirmBox.appendChild(question);
-  confirmBox.appendChild(answerContainer);
+  confirmBox.appendChild(tasksContainer);
+  confirmBox.appendChild(removeBtn);
   confirmBox.appendChild(cancelBtn);
 
   modal.appendChild(confirmBox);
