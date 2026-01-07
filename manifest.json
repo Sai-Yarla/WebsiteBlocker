@@ -17,5 +17,11 @@
   "action": {
     "default_popup": "src/popup.html",
     "default_title": "Page Blocker"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/blocked.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
