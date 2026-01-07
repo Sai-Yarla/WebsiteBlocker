@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Blocked</title>
+  <title>Website Blocked</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
+    
     body {
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     }
-
+    
     .container {
       text-align: center;
       background: white;
@@ -27,282 +27,202 @@
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       max-width: 500px;
+      width: 90%;
     }
-
+    
     .sad-face {
       font-size: 120px;
-      margin-bottom: 20px;
-      display: inline-block;
       animation: bounce 2s infinite;
+      margin-bottom: 20px;
     }
-
+    
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      50% { transform: translateY(-20px); }
     }
-
+    
     h1 {
       color: #333;
-      margin: 0 0 15px 0;
-      font-size: 32px;
+      margin-bottom: 10px;
+      font-size: 28px;
     }
-
+    
     p {
       color: #666;
-      font-size: 16px;
+      margin-bottom: 30px;
       line-height: 1.6;
-      margin: 0 0 30px 0;
     }
-
-    .reason {
-      color: #999;
-      font-size: 14px;
-      margin: 20px 0 0 0;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
-    }
-
+    
     .button-group {
       display: flex;
       gap: 10px;
-      margin-top: 30px;
-      justify-content: center;
-      flex-wrap: wrap;
+      flex-direction: column;
     }
-
-    .back-link,
-    .temp-access-btn {
-      display: inline-block;
-      padding: 10px 20px;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
+    
+    button {
+      padding: 14px 28px;
       border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-
-    .back-link {
-      background: #667eea;
-    }
-
-    .back-link:hover {
-      background: #764ba2;
-      transform: translateY(-2px);
-    }
-
-    .temp-access-btn {
-      background: #ff6b6b;
-    }
-
-    .temp-access-btn:hover:not(:disabled) {
-      background: #ff5252;
-      transform: translateY(-2px);
-    }
-
-    .temp-access-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    .timer-info {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f0f0f0;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #666;
-    }
-
-    .timer-info.active {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .countdown {
+    
+    #tempAccessBtn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 32px;
       font-size: 18px;
-      font-weight: bold;
-      color: #ff6b6b;
     }
-
-    .next-available {
-      font-size: 12px;
-      color: #999;
-      margin-top: 8px;
+    
+    #tempAccessBtn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    #tempAccessBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    #goBackBtn {
+      background: #f0f0f0;
+      color: #333;
+    }
+    
+    #goBackBtn:hover {
+      background: #e0e0e0;
+    }
+    
+    .countdown {
+      display: none;
+      font-size: 18px;
+      color: #667eea;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    
+    .countdown.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="sad-face">😢</div>
-    <h1>Page Blocked</h1>
-    <p>This site is blocked by Page Blocker extension.</p>
-    <div class="reason">You can manage blocked sites in the extension settings.</div>
-
+    <h1>Website Blocked</h1>
+    <p>This website has been blocked to help you stay focused and productive!</p>
+    
     <div class="button-group">
-      <a href="#" class="back-link" onclick="goBack(); return false;">Go Back</a>
-      <button class="temp-access-btn" id="tempAccessBtn" onclick="requestTemporaryAccess()">
+      <button id="tempAccessBtn" onclick="requestTemporaryAccess()">
         Temporary Access (60s)
       </button>
+      <button id="goBackBtn" onclick="window.history.back()">
+        Go Back
+      </button>
     </div>
-
-    <div class="timer-info" id="timerInfo" style="display: none;">
-      <div>Temporary access active: <span class="countdown" id="countdown">60</span>s remaining</div>
-    </div>
-
-    <div class="timer-info" id="nextAvailableInfo" style="display: none;">
-      <div>Next temporary access available in:</div>
-      <div class="next-available" id="nextAvailableTimer"></div>
+    
+    <div class="countdown" id="countdown">
+      Access expires in: <span id="countdownTimer">60</span>s
     </div>
   </div>
 
   <script>
-    const TEMP_ACCESS_DURATION = 60 * 1000; // 60 seconds
-    const RESET_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
-    const STORAGE_KEY = 'tempAccessData';
-
-    function getUrlDomain() {
+    const TEMP_ACCESS_DURATION = 60 * 1000; // 60 seconds in milliseconds
+    
+    // Get the domain from URL parameter
+    function getBlockedDomain() {
       const params = new URLSearchParams(window.location.search);
-      try {
-        const blockedUrl = params.get('blocked');
-        if (blockedUrl) {
-          return new URL(blockedUrl).hostname;
+      const blockedUrl = params.get('blocked');
+      if (blockedUrl) {
+        try {
+          return new URL(blockedUrl).hostname.replace(/^www\./, '');
+        } catch {
+          console.error('Could not parse blocked URL');
+          return null;
         }
-      } catch (e) {
-        console.error('Could not parse URL:', e);
       }
-      return 'unknown';
+      return null;
     }
-
-    function getTempAccessData(domain) {
-      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      if (!data[domain]) {
-        data[domain] = { lastReset: Date.now(), used: false };
-      }
-      return data;
-    }
-
-    function saveTempAccessData(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-
-    function canUseTempAccess() {
-      const domain = getUrlDomain();
-      const data = getTempAccessData(domain);
-      const domainData = data[domain];
-      const timeSinceReset = Date.now() - domainData.lastReset;
-
-      if (timeSinceReset > RESET_INTERVAL) {
-        // Reset the timer
-        domainData.lastReset = Date.now();
-        domainData.used = false;
-        saveTempAccessData(data);
-      }
-
-      return !domainData.used;
-    }
-
+    
+    // Request temporary access
     function requestTemporaryAccess() {
-      const domain = getUrlDomain();
-      const data = getTempAccessData(domain);
-      const domainData = data[domain];
-
-      if (!canUseTempAccess()) {
-        updateButtonState(false);
+      console.log('=== Temporary Access Button Clicked ===');
+      
+      const domain = getBlockedDomain();
+      if (!domain) {
+        console.error('Could not determine blocked domain');
+        alert('Error: Could not determine blocked domain');
         return;
       }
-
-      // Mark as used and set expiration time
-      domainData.used = true;
-      domainData.accessExpires = Date.now() + TEMP_ACCESS_DURATION;
-      saveTempAccessData(data);
-
-      // Show countdown
-      showCountdown();
       
-      // Redirect to blocked URL
-      const blockedUrl = new URLSearchParams(window.location.search).get('blocked');
-      if (blockedUrl) {
-        // Wait a moment before redirecting
-        setTimeout(() => {
-          window.location.href = blockedUrl;
-        }, 500);
-      }
+      console.log('Domain:', domain);
+      
+      // Get current temporary access data
+      chrome.storage.local.get(['tempAccess'], (result) => {
+        console.log('Current tempAccess data:', result.tempAccess);
+        
+        const tempAccess = result.tempAccess || {};
+        
+        // Set new access expiration time
+        const expiresAt = Date.now() + TEMP_ACCESS_DURATION;
+        tempAccess[domain] = expiresAt;
+        
+        console.log('Setting access expiration:', new Date(expiresAt));
+        
+        // Save to chrome storage
+        chrome.storage.local.set({ tempAccess }, () => {
+          console.log('Successfully saved to chrome.storage.local');
+          
+          // Show countdown
+          showCountdown();
+          
+          // Redirect to original URL
+          const blockedUrl = new URLSearchParams(window.location.search).get('blocked');
+          console.log('Will redirect to:', blockedUrl);
+          
+          setTimeout(() => {
+            console.log('Redirecting now...');
+            window.location.href = blockedUrl;
+          }, 500);
+        });
+      });
     }
-
+    
+    // Show countdown timer
     function showCountdown() {
-      document.getElementById('tempAccessBtn').disabled = true;
-      document.getElementById('timerInfo').style.display = 'block';
-
-      let remaining = 59;
-      document.getElementById('countdown').textContent = remaining;
-
+      const countdownDiv = document.getElementById('countdown');
+      const countdownTimer = document.getElementById('countdownTimer');
+      const tempAccessBtn = document.getElementById('tempAccessBtn');
+      
+      console.log('Showing countdown...');
+      
+      countdownDiv.classList.add('show');
+      tempAccessBtn.disabled = true;
+      
+      let secondsLeft = 60;
+      countdownTimer.textContent = secondsLeft;
+      
       const interval = setInterval(() => {
-        remaining--;
-        document.getElementById('countdown').textContent = remaining;
-        if (remaining <= 0) {
+        secondsLeft--;
+        countdownTimer.textContent = secondsLeft;
+        
+        if (secondsLeft <= 0) {
           clearInterval(interval);
+          countdownDiv.classList.remove('show');
+          tempAccessBtn.disabled = false;
         }
       }, 1000);
     }
-
-    function updateButtonState(canUse) {
-      const btn = document.getElementById('tempAccessBtn');
-      const timerInfo = document.getElementById('timerInfo');
-      const nextAvailableInfo = document.getElementById('nextAvailableInfo');
-
-      if (canUse) {
-        btn.disabled = false;
-        btn.textContent = 'Temporary Access (60s)';
-        nextAvailableInfo.style.display = 'none';
-      } else {
-        btn.disabled = true;
-        const domain = getUrlDomain();
-        const data = getTempAccessData(domain);
-        const domainData = data[domain];
-        const timeSinceReset = Date.now() - domainData.lastReset;
-        const timeUntilReset = RESET_INTERVAL - timeSinceReset;
-
-        if (timeUntilReset > 0) {
-          nextAvailableInfo.style.display = 'block';
-          timerInfo.style.display = 'none';
-          updateNextAvailableTimer(timeUntilReset);
-        }
-      }
-    }
-
-    function updateNextAvailableTimer(timeRemaining) {
-      const updateTimer = () => {
-        const hours = Math.floor(timeRemaining / (60 * 60 * 1000));
-        const minutes = Math.floor((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
-        const seconds = Math.floor((timeRemaining % (60 * 1000)) / 1000);
-
-        document.getElementById('nextAvailableTimer').textContent =
-          `${hours}h ${minutes}m ${seconds}s`;
-
-        timeRemaining -= 1000;
-        if (timeRemaining > 0) {
-          setTimeout(updateTimer, 1000);
-        } else {
-          updateButtonState(true);
-        }
-      };
-
-      updateTimer();
-    }
-
-    function goBack() {
-      history.back();
-    }
-
-    // Initialize on load
-    document.addEventListener('DOMContentLoaded', () => {
-      updateButtonState(canUseTempAccess());
-    });
   </script>
 </body>
 </html>

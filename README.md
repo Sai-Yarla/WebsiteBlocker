@@ -30,13 +30,21 @@ A fast and effective Chrome extension that instantly blocks specific websites to
 3. Click **Add** or press Enter
 4. The website is now blocked!
 
-### Removing a Blocked Website (It's Intentionally Annoying!)
+### Removing a Blocked Website (It's Intentionally VERY Annoying!)
 
 1. Click the **Page Blocker** icon in your toolbar
 2. Find the website you want to unblock
 3. Click **Remove** next to it
-4. **Answer a random quiz question correctly** to confirm removal
-5. Get it wrong? The site stays blocked! (Helps keep you focused 😏)
+4. **Complete ALL 10 annoying tasks** to confirm removal:
+   - Type motivational phrases
+   - Solve math problems
+   - Select correct answers from dropdowns
+   - Click specific buttons
+5. Tasks include typing things like "I WANT TO PROCRASTINATE" and "I PROMISE I WILL FOCUS"
+6. Miss ANY task? The remove button stays disabled!
+7. This creates massive friction to prevent impulsive unblocking
+
+**Why 10 tasks?** If you can complete all 10, maybe you really do need that site. But probably not. 😄
 
 ### Temporary Access (60 Seconds)
 
@@ -50,11 +58,12 @@ When you visit a blocked site:
 ## How It Works
 
 - **Manifest V3** - Modern Chrome extension architecture
-- **Background Service Worker** - Monitors navigation events and checks temporary access
-- **Content Scripts** - Runs on blocked sites to verify temporary access validity
-- **Chrome Storage API** - Saves your blocked list and temporary access data locally
-- **Domain Matching** - Blocks all pages under a domain (ignores www variations)
-- **Quiz Confirmation** - Random quiz questions when removing sites to prevent accidental unblocking
+- **Background Service Worker** - Monitors navigation and redirects blocked sites
+- **Content Scripts** - Checks temporary access validity on blocked domains
+- **Chrome Storage & LocalStorage** - Stores blocked list and temporary access data
+- **Domain Matching** - Blocks all subdomains and www variations
+- **Temporary Access System** - 60-second window with localStorage tracking
+- **Anti-Removal Tasks** - 10 verification tasks to prevent impulsive unblocking
 
 ## Technical Details
 
@@ -65,13 +74,21 @@ When you visit a blocked site:
   - `scripting` - Inject content scripts
   - `host_permissions` - Access all URLs for blocking
 
-## Anti-Removal Feature
+## Anti-Removal Feature (The Friction System)
 
-To keep you truly focused, removing a website requires answering a random quiz question:
-- Questions cover extension features and blocked page details
-- Wrong answer = site stays blocked (and you get called out! 😄)
-- Right answer = you can unblock it
-- This friction helps prevent impulsive unblocking
+To keep you TRULY focused, removing a website requires completing 10 different tasks:
+
+**Task Types:**
+- ✍️ **Text Input** - Type phrases like "I WANT TO PROCRASTINATE" (exactly)
+- 🧮 **Math** - Solve: 15×3, 200÷4, 7×8
+- 🔘 **Buttons** - Click the correct button from 3 options
+- 📋 **Dropdowns** - Select the correct answer (What color is the sad page? Answer: Blue & Purple)
+
+**Why This Works:**
+- Takes 2-3 minutes to complete
+- Forces you to think about whether you really need to unblock
+- Every wrong answer = start over
+- Built-in accountability system
 
 ## Files
 

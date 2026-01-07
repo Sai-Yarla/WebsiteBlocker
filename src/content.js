@@ -12,6 +12,7 @@ function checkTemporaryAccess() {
       
       // Check if access has expired
       if (domainData.accessExpires && Date.now() < domainData.accessExpires) {
+        console.log('Temporary access still valid for', domain);
         return true; // Allow access
       }
       
@@ -31,9 +32,17 @@ function checkTemporaryAccess() {
   return false; // Block access
 }
 
-// Listen for messages from background script
+// Check immediately on page load
+if (checkTemporaryAccess()) {
+  console.log('Allowing access due to temporary access being valid');
+} else {
+  console.log('Temporary access not valid, will be blocked');
+}
+
+// Also listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'checkTempAccess') {
-    sendResponse({ hasAccess: checkTemporaryAccess() });
+    const hasAccess = checkTemporaryAccess();
+    sendResponse({ hasAccess: hasAccess });
   }
 });

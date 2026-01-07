@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "tabs",
-    "scripting"
+    "scripting",
+    "webNavigation"
   ],
   "content_scripts": [
     {
